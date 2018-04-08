@@ -1,6 +1,7 @@
 import socket
 import threading
 from DHCalculator import *
+from getIp import *
 
 calculator = DHCalculator()
 class Handler(threading.Thread):
@@ -53,13 +54,21 @@ class Sender(threading.Thread):
                 break
 
 def main():
-    a = int(input("Digite sua chave secreta:\n>> "))
+    print(get_lan_ip())
+    dialog = input("Your IP is:",get_lan_ip()"?(y/n)\n>>")
+    if(dialog == "y"):
+        continue
+    elif(dialog == "n"):
+        dialog = input("Local IP:\n>>")
+    else:
+        print("Invalid input!")
+        main()
+    a = int(input("Type your local key:\n>> "))
     A = str(calculator.calcularA(a))
-    print(A)
-    #localhost = input("LocalIP:")
+    print("Waiting for other pear")
     localport = int(input("LocalPORT:"))
-    receiver = Handler("192.168.0.22",localport)
-    #remotehost = input("remoteIP:")
+    receiver = Handler(dialog,localport)
+    remotehost = input("remoteIP:")
     remoteport = int(input("remotePort"))
     sender = Sender("192.168.0.22",remoteport,A)
     treads = [receiver.start(), sender.start()]
