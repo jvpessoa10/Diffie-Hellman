@@ -2,8 +2,10 @@ import socket
 import threading
 from DHCalculator import *
 from getIp import *
+LOCAL_IP = ""
 
 calculator = DHCalculator()
+
 class Handler(threading.Thread):
     def __init__(self,local_host,local_port):
         threading.Thread.__init__(self,name="messenger_receiver")
@@ -60,8 +62,8 @@ def execute():
     remotehost = input("remoteIP:")
     remoteport = int(input("remotePORT:"))
     print("Waiting for other pear")
-    receiver = Handler(ip,localport)
-    sender = Sender("192.168.0.22",remoteport,A)
+    receiver = Handler(LOCAL_IP,localport)
+    sender = Sender(remotehost,remoteport,A)
     treads = [receiver.start(), sender.start()]
 
 def main():

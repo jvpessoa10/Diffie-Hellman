@@ -1,8 +1,7 @@
 class DHCalculator:
     def __init__(self):
-        self.G = 3
-        self.P = 5
-        self.a = 0
+        self.G = 3527
+        self.P = 4409
     
     def calcularA(self,a):
         self.a = a
