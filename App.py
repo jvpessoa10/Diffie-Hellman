@@ -52,26 +52,31 @@ class Sender(threading.Thread):
                 s.shutdown(2)
                 s.close()
                 break
+            
+def execute():
+    a = int(input("Type your local key:\n>> "))
+    A = str(calculator.calcularA(a))
+    localport = int(input("LocalPORT:"))
+    remotehost = input("remoteIP:")
+    remoteport = int(input("remotePORT:"))
+    print("Waiting for other pear")
+    receiver = Handler(ip,localport)
+    sender = Sender("192.168.0.22",remoteport,A)
+    treads = [receiver.start(), sender.start()]
 
 def main():
-    print(get_lan_ip())
-    dialog = input("Your IP is:",get_lan_ip()"?(y/n)\n>>")
+    LOCAL_IP = get_lan_ip()
+    dialog = input("Your IP is: "+str(LOCAL_IP)+"?(y/n)\n>>")
     if(dialog == "y"):
-        continue
+        execute()
     elif(dialog == "n"):
-        dialog = input("Local IP:\n>>")
+        LOCAL_IP = input("Local IP:\n>>")
+        execute()
     else:
         print("Invalid input!")
         main()
-    a = int(input("Type your local key:\n>> "))
-    A = str(calculator.calcularA(a))
-    print("Waiting for other pear")
-    localport = int(input("LocalPORT:"))
-    receiver = Handler(dialog,localport)
-    remotehost = input("remoteIP:")
-    remoteport = int(input("remotePort"))
-    sender = Sender("192.168.0.22",remoteport,A)
-    treads = [receiver.start(), sender.start()]
+
+
 
 
 if __name__ == "__main__":
