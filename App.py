@@ -16,6 +16,9 @@ class Handler(threading.Thread):
 
     def listen(self):
         global FIRST_CONNECTION_FLAG
+        global G 
+        global P
+        global A
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.bind((self.host,self.port))
         sock.listen(10)
@@ -26,18 +29,19 @@ class Handler(threading.Thread):
                 while True:
                     data = connection.recv(16)
                     full_message +=data.decode("utf-8")
-                    self.dataRecived = full_message
-                    global G
-                    global P
-                    print(G,P)
                     if not data:
-                        if(FIRST_CONNECTION_FLAG):
-                            print(calculator.G,calculator.P)
+                        if(FIRST_CONNECTION_FLAG == False):
+                            self.dataRecived =  full_message.split(",")
+                            print("data recebida",self.dataRecived)
+                            print("P e G transportados:",P,G)
+                            print(calculator.a)
+                            A = calculator.calcularA(G,P)
+                            print(A)
                         else:
-                            GPRecived = self.dataRecived.split(",")
-                            G = GPRecived[0]
-                            P = GPRecived[1]
-                            print(P,G)
+                            print("G e P gerados:",G,P)
+                            print(calculator.a)
+                            A = calculator.calcularA(G,P)
+                            print(A)
                         break
             finally:
                 connection.shutdown(2)
@@ -46,42 +50,45 @@ class Handler(threading.Thread):
         self.listen()
         
 class Sender(threading.Thread):
-    def __init__(self,remote_host,remote_port,a):
+    def __init__(self,remote_host,remote_port):
         threading.Thread.__init__(self,name="messenger_sender")
         self.host = remote_host
         self.port = remote_port
-        self.a = a
 
     def run(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         global FIRST_CONNECTION_FLAG
-        message = ""
-        global G
+        global G 
         global P
+        message = "teste"
         while True:
-            
             try:
                 s.connect((self.host,self.port))
             except Exception:
                 FIRST_CONNECTION_FLAG = True
+                G = calculator.generateGP()
+                P = calculator.generateGP()
             else:
-                if(FIRST_CONNECTION_FLAG):
-                    calculator.generateGP()
-                    message = str(calculator.G)+","+str(calculator.P)
+                if((P and G and A)!= 0):
+                    message = str(A)
+                else: 
+                    message = str(G)+","+str(P)
                 s.sendall(message.encode("utf-8"))
                 s.shutdown(2)
                 s.close()
                 break
             
 def execute():
-    a = int(input("Type your local key:\n>> "))
+    #int(input("Type your local key:\n>> "))
+    a = 1000
+    calculator.setA(a)
     localport = int(input("LocalPORT:"))
-    remotehost = input("remoteIP:")
+    #remotehost = input("remoteIP:")
     remoteport = int(input("remotePORT:"))
     print("Waiting for another peer")
     receiver = Handler(LOCAL_IP,localport)
-    sender = Sender(remotehost,remoteport,a)
-    treads = [receiver.start(), sender.start()]
+    sender = Sender("192.168.0.22",remoteport)
+    treads = [sender.start(),receiver.start()]
 
 def main():
     LOCAL_IP = get_lan_ip()
