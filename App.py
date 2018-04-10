@@ -32,7 +32,8 @@ class Handler(threading.Thread):
                     full_message +=data.decode("utf-8")
                     if not data:
                         if(A >0):
-                            print(calculator.calcularKey(G,full_message))
+                            print("A recebido",full_message)
+                            break
                         if(FIRST_CONNECTION_FLAG == False):
                             if(full_message.count(",") == 1):
                                 self.dataRecived =  full_message.split(",")
@@ -42,13 +43,13 @@ class Handler(threading.Thread):
                                 print("P e G transportados:",G,P)
                             print(P,G)
                             A = calculator.calcularA(int(G),int(P))
-                            print(A)
+                            print("A:",A)
                             
                         else:
                             print("G e P gerados:",G,P)
                             A = calculator.calcularA(int(G),int(P))
-                            print(A)
-                        break
+                            print("A:",A)
+                        
             finally:
                 connection.shutdown(2)
                 connection.close()
@@ -66,8 +67,10 @@ class Sender(threading.Thread):
         global FIRST_CONNECTION_FLAG
         global G 
         global P
-        message = "teste"
+        global A
+        message = ""
         while True:
+            
             try:
                 s.connect((self.host,self.port))
             except Exception:
@@ -75,24 +78,29 @@ class Sender(threading.Thread):
                 G = calculator.generateGP()
                 P = calculator.generateGP()
             else:
+                print("A antes de enviar:", A)
                 if(A > 0):
-                    message = A
-                message = str(G)+","+str(P)
-                s.sendall(message.encode("utf-8"))
+                    print("Condicional")
+                    message = str(A)
+                    print("mensagem a ser enviada:",message)
+                    s.sendall(message.encode("utf-8"))
+                    break
+                else:
+                    message = str(G)+","+str(P)
+                    s.sendall(message.encode("utf-8"))
                 s.shutdown(2)
                 s.close()
-                break
+                
             
 def execute():
-    #int(input("Type your local key:\n>> "))
-    a = 1000
+    a = int(input("Type your local key:\n>> "))
     calculator.setA(a)
     localport = int(input("LocalPORT:"))
-    #remotehost = input("remoteIP:")
+    remotehost = input("remoteIP:")
     remoteport = int(input("remotePORT:"))
     print("Waiting for another peer")
     receiver = Handler(LOCAL_IP,localport)
-    sender = Sender("172.26.116.236",remoteport)
+    sender = Sender(remotehost,remoteport)
     treads = [sender.start(),receiver.start()]
 
 def main():
