@@ -7,6 +7,7 @@ from getIp import *
 LOCAL_IP = ""
 FIRST_CONNECTION_FLAG = False
 calculator = DHCalculator()
+
 class Handler(threading.Thread):
     def __init__(self,local_host,local_port):
         threading.Thread.__init__(self,name="messenger_receiver")
@@ -30,17 +31,22 @@ class Handler(threading.Thread):
                     data = connection.recv(16)
                     full_message +=data.decode("utf-8")
                     if not data:
+                        if(A >0):
+                            print(calculator.calcularKey(G,full_message))
                         if(FIRST_CONNECTION_FLAG == False):
-                            self.dataRecived =  full_message.split(",")
-                            print("data recebida",self.dataRecived)
-                            print("P e G transportados:",P,G)
-                            print(calculator.a)
-                            A = calculator.calcularA(G,P)
+                            if(full_message.count(",") == 1):
+                                self.dataRecived =  full_message.split(",")
+                                print("data recebida",self.dataRecived)
+                                G = self.dataRecived[0]
+                                P = self.dataRecived[1]
+                                print("P e G transportados:",G,P)
+                            print(P,G)
+                            A = calculator.calcularA(int(G),int(P))
                             print(A)
+                            
                         else:
                             print("G e P gerados:",G,P)
-                            print(calculator.a)
-                            A = calculator.calcularA(G,P)
+                            A = calculator.calcularA(int(G),int(P))
                             print(A)
                         break
             finally:
@@ -69,10 +75,9 @@ class Sender(threading.Thread):
                 G = calculator.generateGP()
                 P = calculator.generateGP()
             else:
-                if((P and G and A)!= 0):
-                    message = str(A)
-                else: 
-                    message = str(G)+","+str(P)
+                if(A > 0):
+                    message = A
+                message = str(G)+","+str(P)
                 s.sendall(message.encode("utf-8"))
                 s.shutdown(2)
                 s.close()
@@ -87,7 +92,7 @@ def execute():
     remoteport = int(input("remotePORT:"))
     print("Waiting for another peer")
     receiver = Handler(LOCAL_IP,localport)
-    sender = Sender("192.168.0.22",remoteport)
+    sender = Sender("172.26.116.236",remoteport)
     treads = [sender.start(),receiver.start()]
 
 def main():
