@@ -7,7 +7,9 @@ from getIp import *
 LOCAL_IP = ""
 FIRST_CONNECTION_FLAG = False
 calculator = DHCalculator()
-
+G = 0
+P = 0
+A = 0
 class Handler(threading.Thread):
     def __init__(self,local_host,local_port):
         threading.Thread.__init__(self,name="messenger_receiver")
@@ -31,25 +33,13 @@ class Handler(threading.Thread):
                     data = connection.recv(16)
                     full_message +=data.decode("utf-8")
                     if not data:
-                        if(A >0):
-                            print("A recebido",full_message)
-                            break
-                        if(FIRST_CONNECTION_FLAG == False):
-                            if(full_message.count(",") == 1):
-                                self.dataRecived =  full_message.split(",")
-                                print("data recebida",self.dataRecived)
-                                G = self.dataRecived[0]
-                                P = self.dataRecived[1]
-                                print("P e G transportados:",G,P)
-                            print(P,G)
-                            A = calculator.calcularA(int(G),int(P))
-                            print("A:",A)
-                            
-                        else:
-                            print("G e P gerados:",G,P)
-                            A = calculator.calcularA(int(G),int(P))
-                            print("A:",A)
-                        
+                        if full_message.count(",") == 1:
+                            self.dataRecived =  full_message.split(",")
+                            print("data recebida",self.dataRecived)
+                            G = self.dataRecived[0]
+                            P = self.dataRecived[1]
+                            print("P e G transportados:",G,P)
+                    break
             finally:
                 connection.shutdown(2)
                 connection.close()
@@ -70,7 +60,6 @@ class Sender(threading.Thread):
         global A
         message = ""
         while True:
-            
             try:
                 s.connect((self.host,self.port))
             except Exception:
@@ -78,18 +67,16 @@ class Sender(threading.Thread):
                 G = calculator.generateGP()
                 P = calculator.generateGP()
             else:
-                print("A antes de enviar:", A)
-                if(A > 0):
-                    print("Condicional")
-                    message = str(A)
-                    print("mensagem a ser enviada:",message)
-                    s.sendall(message.encode("utf-8"))
+                print("P e G hehe",P,G)
+                if((P and G) != 0):
+                    print("P e G globais:",P,G)
                     break
-                else:
-                    message = str(G)+","+str(P)
-                    s.sendall(message.encode("utf-8"))
+                message = str(G)+","+str(P)
+                s.send(message.encode("utf-8"))
                 s.shutdown(2)
                 s.close()
+                    
+                
                 
             
 def execute():

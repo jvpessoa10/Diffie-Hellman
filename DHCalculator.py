@@ -2,9 +2,7 @@ from math import sqrt
 from itertools import count, islice
 
     
-G = 0
-P = 0
-A = 0
+
 class DHCalculator:
     def __init__(self):
         self.a = 0
